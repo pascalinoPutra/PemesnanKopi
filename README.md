@@ -1,76 +1,129 @@
-section .data
-    welcome_msg db 'Selamat datang di Pemesanan Kopi!', 0
-    menu_msg db 'Pilih jenis kopi (1. Kopi Hitam, 2. Kopi Susu): ', 0
-    thanks_msg db 'Terima kasih atas pesanan Anda. Selamat menikmati kopi!', 0
-    invalid_msg db 'Pilihan tidak valid. Silakan pilih 1 atau 2.', 0
+.MODEL SMALL
+.CODE 
 
-section .bss
-    choice resb 2 ; Buffer untuk menyimpan pilihan pengguna
 
-section .text
-    global _start
+ORG 100h
 
-_start:
-    ; Menampilkan pesan selamat datang
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, welcome_msg
-    mov edx, 30
-    int 0x80
+START:
+    JMP OrderCoffee
+    kotak1  DB  "==========================================================",10d,13d,'$'
+    Header1 DB  "|                    WELCOME TO COFFEE SHOP               ","|",10d,13d,'$'
+    Header2 DB  "|                      DELEVASI COFFEE                   "," |",10d,13d,'$'
+    Menu    DB  "| Menu               : Americano, Latte, Cappuccino","        |",10d,13d,'$'
+    Size    DB  "| Size               : Regular, Large","                      |",10d,13d,'$'
+    Sugar   DB  "| Sugar Level        : No sugar, Less sugar, Regular sugar"," |",10d,13d,'$'
+    Topping DB  "| Topping            : None, Whipped cream, Caramel drizzle","|",10d,13d,'$'
+    Harga   DB  "| Harga              : Rp.15,000, Rp.20,000 , Rp.23,000 ","   |",10d,13d,'$'
+    kotak2  DB  "==========================================================",10d,13d,'$'  
+     
+    .DATA
+    menu1 DB "Americano|Rp.15,000$", 0
+    menu2 DB "Latte|Rp.20,000$", 0
+    menu3 DB "Cappuccino|Rp.23,000$", 0
+    
+    pesan DB 20 DUP("$") ; Buffer untuk menyimpan pesanan
+    
+    prompt DB "Pilih menu (1-3): $"
+    outputPrompt DB 10d,13d,"Anda memesan: $"
+    invalidPrompt DB 10d,13d,"Pilihan tidak valid. Silakan pilih menu (1-3): $"    
+    
 
-    ; Menampilkan menu pilihan kopi
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, menu_msg
-    mov edx, 46
-    int 0x80
+OrderCoffee:
+    
+    MOV AH,09H 
+    LEA DX,kotak1
+    INT 21h
+    
+    LEA DX,Header1
+    INT 21h
+    
+    LEA DX,Header2
+    INT 21h
+    
+    LEA DX,Menu
+    INT 21h
+    
+    LEA DX,Size
+    INT 21h
+    
+    LEA DX,Sugar
+    INT 21h
+    
+    LEA DX,Topping
+    INT 21h 
+    
+    LEA DX,Harga
+    INT 21h
+    
+    LEA DX,kotak2
+    INT 21h
+         
+ 
+    MAIN PROC
+    MOV AX, @DATA
+    MOV DS, AX
 
-    ; Membaca pilihan pengguna
-    mov eax, 3
-    mov ebx, 0
-    mov ecx, choice
-    mov edx, 2
-    int 0x80
+    MOV AH, 09h
+    LEA DX, prompt
+    INT 21h ; Menampilkan prompt untuk memilih menu
 
-    ; Mengonversi pilihan ke bilangan bulat
-    mov eax, [choice]
-    sub eax, '0'
+input:
+    MOV AH, 01h
+    INT 21h ; Membaca input dari keyboard
 
-    ; Memeriksa pilihan dan menampilkan pesan sesuai
-    cmp eax, 1
-    je black_coffee
-    cmp eax, 2
-    je milk_coffee
-    jmp invalid_choice
+    CMP AL, '1'
+    JE menu1_selected 
+    CMP AL, '2'
+    JE menu2_selected
+    CMP AL, '3'
+    JE menu3_selected
 
-black_coffee:
-    ; Menampilkan pesan untuk kopi hitam
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, thanks_msg
-    mov edx, 46
-    int 0x80
-    jmp exit_program
+    ; Jika pilihan tidak valid, tampilkan pesan kesalahan
+    MOV AH, 09h
+    LEA DX, invalidPrompt
+    INT 21h
+    JMP input
 
-milk_coffee:
-    ; Menampilkan pesan untuk kopi susu
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, thanks_msg
-    mov edx, 46
-    int 0x80
-    jmp exit_program
+menu1_selected:
+    MOV AH, 09h
+    LEA DX, outputPrompt
+    INT 21h
 
-invalid_choice:
-    ; Menampilkan pesan kesalahan untuk pilihan tidak valid
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, invalid_msg
-    mov edx, 46
-    int 0x80
+    ; Menampilkan menu yang dipilih
+    MOV AH, 09h
+    LEA DX, menu1
+    INT 21h
 
-exit_program:
-    ; Keluar dari program
-    mov eax, 1
-    xor ebx, ebx
-    int 0x80
+    JMP exit
+
+menu2_selected:
+    MOV AH, 09h
+    LEA DX, outputPrompt
+    INT 21h
+
+    ; Menampilkan menu yang dipilih
+    MOV AH, 09h
+    LEA DX, menu2
+    INT 21h
+
+    JMP exit
+
+menu3_selected:
+    MOV AH, 09h
+    LEA DX, outputPrompt
+    INT 21h
+
+    ; Menampilkan menu yang dipilih
+    MOV AH, 09h
+    LEA DX, menu3
+    INT 21h
+
+exit:
+    INT 20h
+
+MAIN ENDP
+END MAIN
+
+    
+
+END START
